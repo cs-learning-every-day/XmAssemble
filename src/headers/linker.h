@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include "headers/datastruct.h"
 
 #define MAX_CHAR_SECTION_NAME (32)
 
@@ -48,6 +49,8 @@ typedef enum RELO_TYPE
     R_X86_64_PC32,
     R_X86_64_PLT32,
 } reltype_t;
+
+hashtable_t *link_constant_dict;
 
 // relocation entry type
 typedef struct
