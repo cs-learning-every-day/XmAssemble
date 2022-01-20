@@ -95,8 +95,6 @@ static void parse_symtab(char *str, st_entry_t *ste)
 
     ste->st_value = string2uint(cols[4]);
     ste->st_size = string2uint(cols[5]);
-
-    free_table_entry(cols, num_cols);
 }
 
 static void print_symtab_entry(st_entry_t *ste)
@@ -122,10 +120,6 @@ static void parse_sh(char *str, sh_entry_t *sh)
     sh->sh_addr = string2uint(cols[1]);
     sh->sh_offset = string2uint(cols[2]);
     sh->sh_size = string2uint(cols[3]);
-
-    
-
-    free_table_entry(cols, num_cols);
 }
 
 static void print_sh_entry(sh_entry_t *sh)
@@ -227,8 +221,6 @@ static void parse_relocation(char *str, rl_entry_t *rte)
 
     uint64_t bitmap = string2uint(cols[4]);
     rte->r_addend = *(int64_t *)&bitmap;
-
-    free_table_entry(cols, num_cols);
 }
 
 static void print_relocation_entry(rl_entry_t *rte)
