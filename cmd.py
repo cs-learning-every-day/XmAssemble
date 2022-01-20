@@ -42,19 +42,69 @@ def add_copyright_header():
     # recursively add lines to every .c and .h file
     print("recursively add lines to every .c and .h file")
     for filename in filelist:
-        with open(filename, "r", encoding = 'utf-8') as fr:
-            content = fr.read()
-            if (content.startswith("/* BCST - Introduction to Computer Systems")):
-                print("\tskip\t%s" % filename)
-                fr.close()
-                continue
-            else:
+        try:
+            with open(filename, "r", encoding = 'ascii') as fr:
+                content = fr.read()
+                if (content.startswith("/* BCST - Introduction to Computer Systems")):
+                    print("\tskip\t%s" % filename)
+                    fr.close()
+                    continue
+                else:
+                    fr.close()
+                    # reopen and write data: this is a safer approach
+                    # try to not open in r+ mode
+                    print("\tprepend\t%s" % filename)
+                    with open(filename, "w", encoding = 'ascii') as fw:
+                        fw.write(notification + content)
+                        fw.close()
+        except UnicodeDecodeError:
+            print(filename)
+
+def format_include(s):
+    a = "#include<headers/"
+    b = "#include<"
+
+    # check include
+    if s.startswith(a):
+        s = "#include \"headers/" + s[len(a):]
+        for j in range(len(s)):
+            if s[j] == '>':
+                l = list(s)
+                l[j] = "\""
+                s = "".join(l)
+    elif s.startswith(b):
+        s = "#include <" + s[len(b):]
+    return s
+
+def format_whiteline(s):
+    space = 0
+    for c in s:
+        if c == ' ':
+            space += 1
+    if space == len(s) - 1 and s[-1] == '\n':
+        s = "\n"
+    return s
+
+def format_code():
+    # get files with paths
+    filelist = list(Path(".").rglob("*.[ch]"))
+    # recursively add lines to every .c and .h file
+    print("recursively check every .c and file")
+    for filename in filelist:
+        try:
+            with open(filename, "r", encoding = 'ascii') as fr:
+                content = fr.readlines()
+                for i in range(len(content)):
+                    content[i] = format_include(content[i])
+                    content[i] = format_whiteline(content[i])
                 fr.close()
                 # reopen and write data: this is a safer approach
                 # try to not open in r+ mode
-                print("\tprepend\t%s" % filename)
-                with open(filename, "w", encoding = 'utf-8') as fw:
-                    fw.write(notification + content)
+                with open(filename, "w", encoding = 'ascii') as fw:
+                    fw.writelines(content)
+                    fw.close()
+        except UnicodeDecodeError:
+            print(filename)
 
 def count_lines():
     # get files with paths
@@ -85,23 +135,31 @@ def build(key):
     make_build_directory()
     gcc_map = {
         KEY_MACHINE : [
-            "/usr/bin/gcc-9", 
-            "-Wall", "-g", "-O2", "-Werror", "-std=gnu99", "-Wno-unused-function",
+            "/usr/bin/gcc-7", 
+            "-Wall", "-g", "-O0", "-Werror", "-std=gnu99", "-Wno-unused-function",
             "-I", "./src",
             "./src/tests/test_machine.c",
             "./src/common/print.c",
             "./src/common/convert.c",
+            "./src/common/cleanup.c",
+            "./src/datastruct/trie.c",
+            "./src/datastruct/array.c",
             "./src/hardware/cpu/isa.c",
             "./src/hardware/cpu/mmu.c",
             "./src/hardware/memory/dram.c",
             "-o", EXE_BIN_MACHINE],
         KEY_LINKER : [
-            "/usr/bin/gcc-9", 
-            "-Wall", "-g", "-O2", "-Werror", "-std=gnu99", "-Wno-unused-function",
+            "/usr/bin/gcc-7", 
+            "-Wall", "-g", "-O0", "-Werror", "-std=gnu99", "-Wno-unused-function",
             "-I", "./src",
             "./src/tests/test_elf.c",
             "./src/common/print.c",
             "./src/common/convert.c",
+            "./src/common/malloc.c",
+            "./src/common/cleanup.c",
+            "./src/datastruct/array.c",
+            "./src/datastruct/hashtable.c",
+            "./src/datastruct/linkedlist.c",
             "./src/linker/parseElf.c",
             "./src/linker/staticlink.c",
             "-o", EXE_BIN_LINKER
@@ -124,6 +182,17 @@ def run(key):
         exit()
     subprocess.run([bin_map[key]])
 
+def debug(key):
+    assert(os.path.isdir("./bin/"))
+    bin_map = {
+        KEY_MACHINE : EXE_BIN_MACHINE,
+        KEY_LINKER : EXE_BIN_LINKER
+    }
+    if not key in bin_map:
+        print("input the correct binary key:", bin_map.keys())
+        exit()
+    subprocess.run(["/usr/bin/gdb", bin_map[key]])
+
 def mem_check(key):
     assert(os.path.isdir("./bin/"))
     bin_map = {
@@ -142,25 +211,31 @@ def mem_check(key):
 
 # main
 assert(len(sys.argv) >= 2)
+argv_1_lower = sys.argv[1].lower()
 
-# single argument "python3 cmd.py argv[1]"
-if sys.argv[1] == "build" or sys.argv[1] == "b":
+if "build".startswith(argv_1_lower):
     assert(len(sys.argv) == 3)
     build(sys.argv[2])
-elif sys.argv[1] == "run" or sys.argv[1] == "r":
+elif "run".startswith(argv_1_lower):
+    assert(len(sys.argv) == 3)
     run(sys.argv[2])
-elif sys.argv[1] == KEY_MACHINE:
+elif "debug".startswith(argv_1_lower):
+    assert(len(sys.argv) == 3)
+    debug(sys.argv[2])
+elif KEY_MACHINE.lower().startswith(argv_1_lower):
     build(KEY_MACHINE)
     run(KEY_MACHINE)
-elif sys.argv[1] == KEY_LINKER:
+elif KEY_LINKER.lower().startswith(argv_1_lower):
     build(KEY_LINKER)
     run(KEY_LINKER)
-elif sys.argv[1] == "mem":
+elif "memorycheck".startswith(argv_1_lower):
     assert(len(sys.argv) == 3)
     mem_check(sys.argv[2])
-elif sys.argv[1] == "clean":
-    pass
-elif sys.argv[1] == "copyright":
-    add_copyright_header()
-elif sys.argv[1] == "count":
+elif "count".startswith(argv_1_lower):
     count_lines()
+elif "clean".startswith(argv_1_lower):
+    pass
+elif "copyright".startswith(argv_1_lower):
+    add_copyright_header()
+elif "format".startswith(argv_1_lower):
+    format_code()

@@ -183,9 +183,10 @@ static uint64_t try_get_from_trie(trie_node_t **root, char *key)
 
 static void parse_instruction(const char *str, inst_t *inst);
 static void parse_operand(const char *str, od_t *od);
-static uint64_t decode_operand(od_t *od);
+static uint64_t compute_operand(od_t *od);
 
-static uint64_t decode_operand(od_t *od)
+// interpret the operand
+static uint64_t compute_operand(od_t *od)
 {
     if (od->type == IMM)
     {
@@ -203,6 +204,7 @@ static uint64_t decode_operand(od_t *od)
     }
     else
     {
+        // access memory: return the physical address
         uint64_t vaddr = 0;
 
         if (od->type == MEM_IMM)
@@ -223,7 +225,7 @@ static uint64_t decode_operand(od_t *od)
         }
         else if (od->type == MEM_IMM_REG1_REG2)
         {
-            vaddr = od->imm + (*((uint64_t *)od->reg1)) + (*((uint64_t *)od->reg2));
+            vaddr = od->imm +  (*((uint64_t *)od->reg1)) + (*((uint64_t *)od->reg2));
         }
         else if (od->type == MEM_REG2_SCAL)
         {
@@ -241,8 +243,6 @@ static uint64_t decode_operand(od_t *od)
         {
             vaddr = od->imm + (*((uint64_t *)od->reg1)) + (*((uint64_t *)od->reg2)) * od->scal;
         }
-
-        // virtual address
         return vaddr;
     }
 
@@ -523,8 +523,8 @@ static inline void increase_pc()
 
 static void mov_handler(od_t *src_od, od_t *dst_od)
 {
-    uint64_t src = decode_operand(src_od);
-    uint64_t dst = decode_operand(dst_od);
+    uint64_t src = compute_operand(src_od);
+    uint64_t dst = compute_operand(dst_od);
 
     if (src_od->type == REG && dst_od->type == REG)
     {

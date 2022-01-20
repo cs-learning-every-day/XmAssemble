@@ -21,8 +21,7 @@ uint64_t string2uint_range(const char *str, int start, int end)
     /*
     int dfa[256][100];
     while (state != accept) {
-        
-    state = dfa[state][input];
+        state = dfa[state][input];
     }*/
     int state = 0;
 

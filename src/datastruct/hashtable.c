@@ -45,8 +45,12 @@ hashtable_t *hashtable_construct(int size)
         hashtable_bucket_t *b = malloc(sizeof(hashtable_bucket_t));
         b->localdepth = 1;
         b->counter = 0;
+        
         b->karray = malloc(tab->size * sizeof(char *));
+        memset(b->karray, 0, tab->size * sizeof(char *));
+
         b->varray = malloc(tab->size * sizeof(uint64_t));
+        memset(b->varray, 0, tab->size * sizeof(char *));
 
         tab->directory[i] = b;
     }
@@ -61,6 +65,9 @@ void hashtable_free(hashtable_t *tab)
         return;
     }
 
+    debug_printf(DEBUG_DATASTRUCTURE, "free hashtable:\n");
+    print_hashtable(tab);
+
     for (int i = 0; i < tab->num; ++ i)
     {
         hashtable_bucket_t *b = tab->directory[i];
@@ -69,7 +76,7 @@ void hashtable_free(hashtable_t *tab)
             continue;
         }
 
-        for (int j = 0; j < tab->size; ++ j)
+        for (int j = 0; j < b->counter; ++ j)
         {
             if (b->karray != NULL && b->karray[j] != NULL)
             {
@@ -228,7 +235,7 @@ static void split_bucket_full(hashtable_t *tab, hashtable_bucket_t *b)
     }
 
     // till now, all pairs from b have been moved to b0(b) and b1
-    
+
     // hid64 now is the last hid64, but the low bits should be the same
     uint64_t hid_lowbits = lowbits_n(hid64, before_localdepth);
     for (int highbits = 0; highbits < (1 << (tab->globaldepth - before_localdepth)); ++ highbits)
