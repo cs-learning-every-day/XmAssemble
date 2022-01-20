@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.js": "javascript",
+        "*.jsx": "javascriptreact",
+        "*.wxss": "css",
+        "*.wxml": "html",
+        "datastruct.h": "c",
+        "common.h": "c",
+        "cpu.h": "c"
+    }
+}

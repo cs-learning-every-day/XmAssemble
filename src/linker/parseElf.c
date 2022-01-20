@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <headers/linker.h>
-#include <headers/common.h>
+#include "headers/linker.h"
+#include "headers/common.h"
 
 static int parse_table_entry(char *str, char ***ent)
 {

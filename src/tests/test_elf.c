@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <headers/linker.h>
-#include <headers/common.h>
+#include "headers/linker.h"
+#include "headers/common.h"
 
 int main()
 {

@@ -172,7 +172,8 @@ typedef struct REGISTER_STRUCT
         uint16_t r15w;
         uint8_t r15b;
     };
-} reg_t;
+} cpu_reg_t;
+cpu_reg_t cpu_reg;
 
 /*======================================*/
 /*      cpu core                        */
@@ -206,7 +207,7 @@ typedef struct REGISTER_STRUCT
 */
 typedef union CPU_FLAGS_STRUCT
 {
-    uint64_t __cpu_flag_values;
+    uint64_t __flags_value;
     struct
     {
         // carry flag: detect overflow for unsigned operations
@@ -218,37 +219,23 @@ typedef union CPU_FLAGS_STRUCT
         // overflow flag: detect overflow for signed operations
         uint16_t OF;
     };
-} cpu_flag_t;
+} cpu_flags_t;
+cpu_flags_t cpu_flags;
 
-typedef struct CORE_STRUCT
+// program counter or instruction pointer
+typedef union
 {
-    // program counter or instruction pointer
-    union
-    {
-        uint64_t rip;
-        uint32_t eip;
-    };
+    uint64_t rip;
+    uint32_t eip;
+} cpu_pc_t;
+cpu_pc_t cpu_pc;
 
-
-   cpu_flag_t flags;
-
-    // register files
-    reg_t reg;
-} core_t;
-
-// define cpu core array to support core level parallelism
-#define NUM_CORES 1
-core_t cores[NUM_CORES];
-// active core for current task
-uint64_t ACTIVE_CORE;
-
-#define MAX_INSTRUCTION_CHAR 64
 #define NUM_INSTRTYPE 14
 
-void instruction_cycle(core_t *cr);
+void instruction_cycle();
 
 // translate the virtual address to physical address in MMU
 // each MMU is owned by each core
-uint64_t va2pa(uint64_t vaddr, core_t *cr);
+uint64_t va2pa(uint64_t vaddr);
 
 #endif
