@@ -135,7 +135,7 @@ def build(key):
     make_build_directory()
     gcc_map = {
         KEY_MACHINE : [
-            "/usr/bin/gcc-7", 
+            "/usr/bin/gcc-9", 
             "-Wall", "-g", "-O0", "-Werror", "-std=gnu99", "-Wno-unused-function",
             "-I", "./src",
             "./src/tests/test_machine.c",
@@ -149,13 +149,13 @@ def build(key):
             "./src/hardware/memory/dram.c",
             "-o", EXE_BIN_MACHINE],
         KEY_LINKER : [
-            "/usr/bin/gcc-7", 
+            "/usr/bin/gcc-9", 
             "-Wall", "-g", "-O0", "-Werror", "-std=gnu99", "-Wno-unused-function",
             "-I", "./src",
             "./src/tests/test_elf.c",
             "./src/common/print.c",
             "./src/common/convert.c",
-            "./src/common/malloc.c",
+            "./src/common/tagmalloc.c",
             "./src/common/cleanup.c",
             "./src/datastruct/array.c",
             "./src/datastruct/hashtable.c",
