@@ -761,6 +761,21 @@ static void relocation_processing(elf_t **srcs, int num_srcs, elf_t *dst,
     }
 }
 
+static uint64_t get_symbol_runtime_address(elf_t *dst, st_entry_t *sym)
+{
+    return 0xFFFFFFFFFFFFFFFF;
+}
+
+static void write_relocation(char *dst, uint64_t val)
+{    
+    char temp[20];
+    sprintf(temp, "0x%016lx", val);
+    for (int i = 0; i < 18; ++ i)
+    {
+        dst[i] = temp[i];
+    }
+}
+
 // relocating handlers
 static void R_X86_64_32_handler(elf_t *dst, sh_entry_t *sh,
                                 int row_referencing, int col_referencing, int addend,
@@ -769,6 +784,10 @@ static void R_X86_64_32_handler(elf_t *dst, sh_entry_t *sh,
     printf("row = %d, col = %d, symbol referenced = %s\n",
         row_referencing, col_referencing, sym_referenced->st_name
     );
+    char *s = &dst->buffer[sh->sh_offset + row_referencing][col_referencing];
+    for (int i = 0; i < 18; i++) {
+        s[i] = '?';
+    }
 }
 
 static void R_X86_64_PC32_handler(elf_t *dst, sh_entry_t *sh,
@@ -778,6 +797,10 @@ static void R_X86_64_PC32_handler(elf_t *dst, sh_entry_t *sh,
     printf("row = %d, col = %d, symbol referenced = %s\n",
         row_referencing, col_referencing, sym_referenced->st_name
     );
+    char *s = &dst->buffer[sh->sh_offset + row_referencing][col_referencing];
+    for (int i = 0; i < 18; i++) {
+        s[i] = '?';
+    }
 }
 
 static void R_X86_64_PLT32_handler(elf_t *dst, sh_entry_t *sh,
@@ -787,4 +810,8 @@ static void R_X86_64_PLT32_handler(elf_t *dst, sh_entry_t *sh,
     printf("row = %d, col = %d, symbol referenced = %s\n",
         row_referencing, col_referencing, sym_referenced->st_name
     );
+    char *s = &dst->buffer[sh->sh_offset + row_referencing][col_referencing];
+    for (int i = 0; i < 18; i++) {
+        s[i] = '?';
+    }
 }

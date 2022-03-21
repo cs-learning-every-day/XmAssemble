@@ -389,5 +389,10 @@ void write_eof(const char *filename, elf_t *eof)
 void free_elf(elf_t *elf)
 {
     assert(elf != NULL);
-    tag_sweep("parse_elf");
+    
+    tag_free(elf->sht);
+    tag_free(elf->symt);
+    tag_free(elf->reltext);
+    tag_free(elf->reldata);
+    tag_free(elf);
 }
