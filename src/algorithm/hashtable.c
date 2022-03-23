@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "headers/common.h"
-#include "headers/datastruct.h"
+#include "headers/algorithm.h"
 
 static uint64_t hash_function(char *str)
 {

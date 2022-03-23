@@ -6,6 +6,7 @@
         "*.wxml": "html",
         "datastruct.h": "c",
         "common.h": "c",
-        "cpu.h": "c"
+        "cpu.h": "c",
+        "linker.h": "c"
     }
 }
