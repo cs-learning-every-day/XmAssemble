@@ -493,7 +493,7 @@ static void mov_handler(od_t *src_od, od_t *dst_od)
     {
         // src: register
         // dst: virtual address
-        write64bits_dram(
+        cpu_cpu_write64bits_dram(
             va2pa(dst), 
             *(uint64_t *)src);
         increase_pc();
@@ -504,7 +504,7 @@ static void mov_handler(od_t *src_od, od_t *dst_od)
     {
         // src: virtual address
         // dst: register
-        *(uint64_t *)dst = read64bits_dram(va2pa(src));
+        *(uint64_t *)dst = cpu_read64bits_dram(va2pa(src));
         increase_pc();
         cpu_flags.__flags_value = 0;
         return;
@@ -530,7 +530,7 @@ static void push_handler(od_t *src_od, od_t *dst_od)
         // src: register
         // dst: empty
         cpu_reg.rsp = cpu_reg.rsp - 8;
-        write64bits_dram(
+        cpu_write64bits_dram(
             va2pa(cpu_reg.rsp), 
             *(uint64_t *)src);
         increase_pc();
@@ -548,7 +548,7 @@ static void pop_handler(od_t *src_od, od_t *dst_od)
     {
         // src: register
         // dst: empty
-        uint64_t old_val = read64bits_dram(
+        uint64_t old_val = cpu_read64bits_dram(
             va2pa(cpu_reg.rsp));
         cpu_reg.rsp = cpu_reg.rsp + 8;
         *(uint64_t *)src = old_val;
@@ -564,7 +564,7 @@ static void leave_handler(od_t *src_od, od_t *dst_od)
     cpu_reg.rsp = cpu_reg.rbp;
 
     // popq %rbp
-    uint64_t old_val = read64bits_dram(
+    uint64_t old_val = cpu_read64bits_dram(
         va2pa(cpu_reg.rsp));
     cpu_reg.rsp = cpu_reg.rsp + 8;
     cpu_reg.rbp = old_val;
@@ -581,7 +581,7 @@ static void call_handler(od_t *src_od, od_t *dst_od)
     // dst: empty
     // push the return value
     cpu_reg.rsp = cpu_reg.rsp - 8;
-    write64bits_dram(
+    cpu_write64bits_dram(
         va2pa(cpu_reg.rsp),
         cpu_pc.rip + sizeof(char) * MAX_INSTRUCTION_CHAR);
     // jump to target function address
@@ -597,7 +597,7 @@ static void ret_handler(od_t *src_od, od_t *dst_od)
     // src: empty
     // dst: empty
     // pop rsp
-    uint64_t ret_addr = read64bits_dram(
+    uint64_t ret_addr = cpu_read64bits_dram(
         va2pa(cpu_reg.rsp));
     cpu_reg.rsp = cpu_reg.rsp + 8;
     // jump to return address
@@ -678,7 +678,7 @@ static void cmp_handler(od_t *src_od, od_t *dst_od)
         // src: register (value: int64_t bit map)
         // dst: register (value: int64_t bit map)
         // dst = dst - src = dst + (-src)
-        uint64_t dval = read64bits_dram(va2pa(dst));
+        uint64_t dval = cpu_read64bits_dram(va2pa(dst));
         uint64_t val = dval + (~src + 1);
 
         int val_sign = ((val >> 63) & 0x1);
