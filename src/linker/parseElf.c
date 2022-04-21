@@ -381,7 +381,7 @@ void write_eof(const char *filename, elf_t *eof)
     }
 
     fclose(fp);
-    
+
     // free hash table
     hashtable_free(link_constant_dict);
 }
@@ -389,7 +389,7 @@ void write_eof(const char *filename, elf_t *eof)
 void free_elf(elf_t *elf)
 {
     assert(elf != NULL);
-    
+
     tag_free(elf->sht);
     tag_free(elf->symt);
     tag_free(elf->reltext);

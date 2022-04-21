@@ -388,7 +388,7 @@ static void compute_section_header(elf_t *dst, smap_t *smap_table, int *smap_cou
         // get the pointer
         assert(sh_index < dst->sht_count);
         sh = &(dst->sht[sh_index]);
-        
+
         // write the fields
         strcpy(sh->sh_name, ".rodata");
         sh->sh_addr = rodata_runtime_addr;
@@ -404,13 +404,13 @@ static void compute_section_header(elf_t *dst, smap_t *smap_table, int *smap_cou
         section_offset += sh->sh_size;
     }
     // else skip .rodata
-    
+
     if (count_data > 0)
     {
         // get the pointer
         assert(sh_index < dst->sht_count);
         sh = &(dst->sht[sh_index]);
-        
+
         // write the fields
         strcpy(sh->sh_name, ".data");
         sh->sh_addr = data_runtime_addr;
@@ -431,7 +431,7 @@ static void compute_section_header(elf_t *dst, smap_t *smap_table, int *smap_cou
     // get the pointer
     assert(sh_index < dst->sht_count);
     sh = &(dst->sht[sh_index]);
-    
+
     // write the fields
     strcpy(sh->sh_name, ".symtab");
     sh->sh_addr = symtab_runtime_addr;
@@ -525,10 +525,10 @@ static void merge_section(elf_t **srcs, int num_srcs, elf_t *dst,
                                     int dst_index = line_written + t;
                                     int src_index = srcs[i]->sht[src_section_index].sh_offset +
                                         sym->st_value + t;
-                                    
+
                                     assert(dst_index < MAX_ELF_FILE_LENGTH);
                                     assert(src_index < MAX_ELF_FILE_LENGTH);
-                                    
+
                                     strcpy(
                                         dst->buffer[dst_index],
                                         srcs[i]->buffer[src_index]);
@@ -695,7 +695,7 @@ static void relocation_processing(elf_t **srcs, int num_srcs, elf_t *dst,
             NEXT_REFERENCE_IN_TEXT:
             ;
         }
-        
+
         // .rel.data
         for (int j = 0; j < elf->reldata_count; ++ j)
         {

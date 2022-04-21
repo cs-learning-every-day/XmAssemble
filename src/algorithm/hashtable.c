@@ -45,7 +45,7 @@ hashtable_t *hashtable_construct(int size)
         hashtable_bucket_t *b = malloc(sizeof(hashtable_bucket_t));
         b->localdepth = 1;
         b->counter = 0;
-        
+
         b->karray = malloc(tab->size * sizeof(char *));
         memset(b->karray, 0, tab->size * sizeof(char *));
 

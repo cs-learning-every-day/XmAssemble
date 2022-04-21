@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 
     elf_t linked;
     link_elf(srcs, elf_num, &linked);
-    
+
     char eof_fullpath[100];
     sprintf(eof_fullpath, "%s/%s.eof.txt", EXECUTABLE_DIRECTORY, eof_fn);
     printf("into %s\n", eof_fullpath);
