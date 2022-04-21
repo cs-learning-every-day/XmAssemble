@@ -245,33 +245,70 @@ def mem_check(key):
         bin_map[key]
     ])
 
+def cache_verify():
+    make_build_directory()
+    csim_ref_file = "/home/ubuntu/.config/.tmp/whatis/csapp/labs/cachelab-handout/csim-ref"
+    trace_dir = "/home/ubuntu/.config/.tmp/whatis/csapp/labs/cachelab-handout/traces/"
+
+    assert(os.path.isfile(csim_ref_file))
+    assert(os.path.isdir(trace_dir))
+
+    test_cases = [
+        # s E b
+        # [   2,  1,      2,  "wide.trace"    ],
+        # [   3,  2,      2,  "load.trace"    ],
+        [   1,  1,      1,  "yi2.trace"     ],
+        [   4,  2,      4,  "yi.trace"      ],
+        [   2,  1,      4,  "dave.trace"    ],
+        [   2,  1,      3,  "trans.trace"   ],
+        [   2,  2,      3,  "trans.trace"   ],
+        [   14, 1024,   3,  "trans.trace"   ],
+        [   5,  1,      5,  "trans.trace"   ],
+        [   5,  1,      5,  "long.trace"    ],
+    ]
+
+    for [s, E, b, file] in test_cases:
+        # need to reload shared library for each test run
+        # thus we start a new process
+        a = [
+            "/usr/bin/python3",
+            "./src/hardware/cpu/cache_verify.py",
+            csim_ref_file,
+            trace_dir + file,
+            str(s), str(E), str(b),
+        ]
+        print(" ".join(a))
+        subprocess.run(a)
+
 # main
 assert(len(sys.argv) >= 2)
-argv_1_lower = sys.argv[1].lower()
+operation = sys.argv[1].lower()
 
-if "build".startswith(argv_1_lower):
+if "build".startswith(operation):
     assert(len(sys.argv) == 3)
     build(sys.argv[2])
-elif "run".startswith(argv_1_lower):
+elif "run".startswith(operation):
     assert(len(sys.argv) == 3)
     run(sys.argv[2])
-elif "debug".startswith(argv_1_lower):
+elif "debug".startswith(operation):
     assert(len(sys.argv) == 3)
     debug(sys.argv[2])
-elif KEY_MACHINE.lower().startswith(argv_1_lower):
+elif operation.lower() == KEY_MACHINE.lower():
     build(KEY_MACHINE)
     run(KEY_MACHINE)
-elif KEY_LINKER.lower().startswith(argv_1_lower):
+elif operation.lower() == KEY_LINKER.lower():
     build(KEY_LINKER)
     run(KEY_LINKER)
-elif "memorycheck".startswith(argv_1_lower):
+elif operation == "memorycheck":
     assert(len(sys.argv) == 3)
     mem_check(sys.argv[2])
-elif "count".startswith(argv_1_lower):
+elif operation == "count":
     count_lines()
-elif "clean".startswith(argv_1_lower):
+elif operation == "clean":
     pass
-elif "copyright".startswith(argv_1_lower):
+elif operation == "copyright":
     add_copyright_header()
-elif "format".startswith(argv_1_lower):
+elif operation == "format":
     format_code()
+elif operation == "csim":
+    cache_verify()

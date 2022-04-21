@@ -2,7 +2,6 @@
 #define MEMORY_H
 
 #include <stdint.h>
-#include "headers/cpu.h"
 
 #define PHYSICAL_MEMORY_SPACE 65536
 #define MAX_INDEX_PHYSICAL_PAGE 15
