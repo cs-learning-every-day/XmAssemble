@@ -6,6 +6,7 @@ import sys
 import os
 import subprocess
 import copy
+import time
 from pathlib import Path
 from ctypes import *
 from functools import reduce
@@ -56,15 +57,19 @@ def run_csim_ref(s, E, b, csim_ref_file, trace_file):
     stat_line = ""
     trace = []
     for line in data:
-        if line.endswith("hit"):
-            trace += ["hit"]
-        elif line.endswith("miss"):
-            trace += ["miss"]
-        elif line.endswith("miss eviction"):
-            trace += ["miss eviction"]
-        elif line.startswith("hits:"):
+        line = line.strip()
+        
+        if line.startswith("hits:"):
             stat_line = line
-
+        else:
+            ch = ''
+            for c in line:
+                if c == 'm' or c == 'h':
+                    ch = c
+                    break
+            if ch == '': continue
+            msg = line[line.find(ch):]
+            trace += [msg]
     return scan_ints(stat_line), trace
 
 def read_trace(trace_file):
@@ -76,19 +81,21 @@ def read_trace(trace_file):
                 # parse trace line
                 #   L 7ff000384,4
                 #   S 7ff000388,4
-                split_space = (line.strip(" ")).split(" ")
-                assert(len(split_space) == 2)
+                #   M 7ff00038C,4
+                #   I  004005c5,7
+                split_space = (' '.join((line.strip(" ")).split())).split(" ")
+                # print(line.strip(" "))
+                # assert(len(split_space) == 2)
 
                 op = split_space[0]
-                assert(op == "L" or op == "S" or op == "M")
-
+                assert(op == "L" or op == "S" or op == "M" or op == "I")
                 split_comma = (split_space[1]).split(",")
                 assert(len(split_comma) == 2)
                 
                 paddr = int("0x" + split_comma[0], 16)
 
                 bsize = int(split_comma[1])
-                assert(bsize == 1 or bsize == 2 or bsize == 4 or bsize == 8)
+                # assert(bsize == 1 or bsize == 2 or bsize == 4 or bsize == 8)
 
                 results += [[op, paddr, bsize]]
             return results
@@ -120,7 +127,7 @@ def run_csim(s, E, b, trace_file, ref_trace):
             "./src/hardware/cpu/sram.c",
             "-ldl", "-o", "./bin/csim.so"
         ])
-    
+    time.sleep(1)
     # read trace file
     trace = read_trace(trace_file)
 
@@ -130,20 +137,29 @@ def run_csim(s, E, b, trace_file, ref_trace):
     i = 0
     pass_trace = True
     for [op, paddr, bsize] in trace:
+        if op == "I": continue
         if debug:
             print_paddr(paddr, s, b)
             print(op, "%x" % paddr, bsize)
         
+        cache_behavior = ""
+
         if op == "L":
             lib.sram_cache_read(c_ulonglong(paddr))
         elif op == "S":
-            lib.sram_cache_write(c_ulonglong(paddr), c_byte(1))
+            lib.sram_cache_write(c_ulonglong(paddr), c_byte(bsize))
+        elif op == "M":
+            lib.sram_cache_read(c_ulonglong(paddr))
+            cache_behavior += ((c_char_p.in_dll(lib, "trace_ptr")).value).decode("ascii") + " "
+            lib.sram_cache_write(c_ulonglong(paddr), c_byte(bsize))
+        elif op == 'I':
+            continue
         
         if debug:
             lib.print_cache()
             lib.fflush(None)
         
-        cache_behavior = ((c_char_p.in_dll(lib, "trace_ptr")).value).decode("ascii")
+        cache_behavior += ((c_char_p.in_dll(lib, "trace_ptr")).value).decode("ascii")
         
         if debug:
             print("test:", cache_behavior, "ref:", ref_trace[i])
